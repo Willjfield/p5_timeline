@@ -4,18 +4,23 @@ var radius
 var animation
 
 function setup(){
-	createCanvas(800,800)
+	createCanvas(windowWidth,windowHeight)
 	radius = 3.67
 	animation = new Timeline('radius')
-	animation.addKey(200, 1,'linear')
-	animation.addKey(150,2,'linear')
-	animation.addKey(250,2.5,'linear')
-	animation.addKey(500,3,'linear')
+	animation.addKey(200, .25,'linear')
+	animation.addKey(150,.5,'linear')
+	animation.addKey(250,1,'linear')
+	animation.addKey(300,1.5,'linear')
+	
 	fill(255)
+	textAlign(CENTER)
+	textSize(32)
+
 }
 function draw(){
 	background(0)
-	ellipse(200,200,radius,radius)
+	ellipse(windowWidth/2,windowHeight/2,radius,radius)		
+	text("Click to play the animation",windowWidth/2,windowHeight-100)
 }
 
 function mousePressed(){
@@ -89,7 +94,9 @@ Timeline.prototype.play = function(){
 		}	
 		isPlaying = false
 		console.log(someVar)
-	}	
+	}
+		
 	animate()
+	
 }
 
