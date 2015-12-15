@@ -1,4 +1,4 @@
-Below is a pseudocode description of how we see the end user implementing the library:
+//Example ideal usage of p5Keyframes
 
 //create some number (int or float)
 var someVar = 3.67
@@ -6,9 +6,12 @@ var someVar = 3.67
 //create a new timeline for the variable someVar
 var animation = new Timeline(someVar)
 
-//Add a new key 
+//value is already set to 3.67 in the code. Whatever the value of the variable is before the timeline plays is the value at time=0 in the timeline. The first key here will interpolate from that value to 100 in 2 seconds with an ease
 addKey([value], [timestamp],[interpolation])
 animation.addKey(100,2,"Ease")
+
+//add a key to bring someVar to 50 at 4 seconds into the animation. Interpolate to give integers only.
+animation.addKey(50,4,"Integer")
 
 //change the first keyframe's interpolation to linear
 animation.key(0).interpolate = "Linear"
@@ -80,4 +83,3 @@ for(var k =0;k<20;k++){
 		boolAnimation.addKey(true,k)
 	}
 }
-
