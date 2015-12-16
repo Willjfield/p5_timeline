@@ -19,8 +19,22 @@ function setup(){
 }
 function draw(){
 	background(0)
-	ellipse(windowWidth/2,windowHeight/2,radius,radius)		
-	text("Click to play the animation",windowWidth/2,windowHeight-100)
+	ellipse(windowWidth/2,windowHeight/2,radius,radius)	
+	fill(255,radius,0);
+	rectMode(CENTER)
+	push();
+	translate(windowWidth/3,windowWidth/3);
+	rotate(radius/20);
+	rect(0,0,radius,radius*2);
+	pop();
+	push();
+	translate(windowWidth*.66,windowWidth*.33);
+	rotate(radius/20);
+	rect(0,0,radius,radius*2);
+	pop();		
+		
+		
+	text("Click once to play the animation",windowWidth/2,windowHeight-100)
 }
 
 function mousePressed(){
