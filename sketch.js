@@ -5,12 +5,12 @@ var animation
 
 function setup(){
 	createCanvas(windowWidth,windowHeight)
-	radius = 3.67
+	radius = 100
 	animation = new Timeline('radius')
-	animation.addKey(200, .25,'linear')
-	animation.addKey(150,.5,'linear')
-	animation.addKey(250,1,'linear')
-	animation.addKey(300,1.5,'linear')
+	animation.addKey(200, .5,'ease')
+	animation.addKey(100,1,'ease')
+	animation.addKey(200,1.5,'linear')
+	animation.addKey(100,2,'linear')
 	
 	fill(255)
 	textAlign(CENTER)
@@ -96,9 +96,11 @@ Timeline.prototype.play = function(){
 				//curValue = lerp(startValue,keys[keyNum].targetValue,elapsedTime/(keys[keyNum].time*1000))
 			}else if(keys[keyNum].interpolation == 'ease'){
 				//Put in code for easing here
-				curValue=startValue+(keys[keyNum].targetValue-startValue)*(elapsedTime/(keys[keyNum].time*1000))
+				var curTime=(elapsedTime/(keys[keyNum].time*1000))
+				curTime = (3*curTime*curTime)-(2*curTime*curTime*curTime)
+				curValue=startValue+(keys[keyNum].targetValue-startValue)*curTime
 			}
-				console.log('setting value to: ')
+				console.log('setting value to: '+curValue)
 			Timeline.set(variable.name,curValue)
 		}else if(keyNum<keys.length-1){
 			startValue = window[variable.name]
@@ -107,7 +109,7 @@ Timeline.prototype.play = function(){
 			setTimeout(animate,1000/getFrameRate())
 		}	
 		isPlaying = false
-		console.log(someVar)
+	//	console.log(someVar)
 	}
 		
 	animate()
