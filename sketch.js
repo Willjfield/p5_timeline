@@ -7,11 +7,16 @@ function setup(){
 	createCanvas(windowWidth,windowHeight)
 	radius = 100
 	animation = new Timeline('radius')
+	animation.playSpeed = 2
+
 	animation.addKey(200, .5,'ease')
 	animation.addKey(100,1,'ease')
 	animation.addKey(200,1.5,'linear')
 	animation.addKey(100,2,'linear')
-	
+	animation.shiftKeys(20)
+	for(var k in animation.keys){
+		console.log(animation.keys[k].time)
+	}
 	fill(255)
 	textAlign(CENTER)
 	textSize(32)
@@ -54,6 +59,13 @@ var Timeline = function(_variable){
 	}
 	this.keys = []
 	this.isPlaying = false
+	this.playSpeed = 1
+}
+
+Timeline.prototype.shiftKeys = function(amount){
+	this.keys.forEach(function(entry) {
+		entry.time+=amount
+	});
 }
 
 Timeline.prototype.addKey = function(targetValue,time,interpolation){
@@ -75,6 +87,7 @@ Timeline.prototype.play = function(){
 	var isPlaying = this.isPlaying
 	var keys = this.keys
 	var variable = this.variable
+	var playSpeed = this.playSpeed
 	var startTime = 0
 	var keyNum = 0
 
@@ -88,8 +101,7 @@ Timeline.prototype.play = function(){
 		var elapsedTime = millis()-startTime;
 		console.log('start value:' + startValue)
 		console.log('target value:' + keys[keyNum].targetValue)
-		var playSpeed = 1
-		if(elapsedTime<keys[keyNum].time*1000*(1/playSpeed)){
+		if(elapsedTime<keys[keyNum].time*1000/playSpeed){
 			setTimeout(animate,1000/getFrameRate())	
 			var curTime=(elapsedTime/(keys[keyNum].time*1000))*playSpeed			
 			if(keys[keyNum].interpolation=='linear'){	
