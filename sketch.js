@@ -9,11 +9,12 @@ function setup(){
 	animation = new Timeline('radius')
 	animation.playSpeed = 2
 
-	animation.addKey(200, .5,'ease')
-	animation.addKey(100,1,'ease')
-	animation.addKey(200,1.5,'linear')
+	animation.addKey(200, 2,'ease')
+	animation.addKey(100,2,'ease')
+	animation.addKey(200,2,'linear')
 	animation.addKey(100,2,'linear')
-	animation.shiftKeys(20)
+	//animation.stretchKeys(5)
+	animation.startKey(5)
 	for(var k in animation.keys){
 		console.log(animation.keys[k].time)
 	}
@@ -59,13 +60,23 @@ var Timeline = function(_variable){
 	}
 	this.keys = []
 	this.isPlaying = false
+	this.startTime = 0
 	this.playSpeed = 1
 }
 
-Timeline.prototype.shiftKeys = function(amount){
+Timeline.prototype.stretchKeys = function(amount){
 	this.keys.forEach(function(entry) {
-		entry.time+=amount
+		entry.time*=amount
 	});
+}
+
+Timeline.prototype.startKey = function(amount){
+	var key = {
+		targetValue: this.variable.value,
+		time: amount,
+		interpolation: 'linear'
+	}
+	this.keys.unshift(key)
 }
 
 Timeline.prototype.addKey = function(targetValue,time,interpolation){
@@ -88,7 +99,7 @@ Timeline.prototype.play = function(){
 	var keys = this.keys
 	var variable = this.variable
 	var playSpeed = this.playSpeed
-	var startTime = 0
+	var startTime = this.startTime
 	var keyNum = 0
 
 	if(!isPlaying){
