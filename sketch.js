@@ -88,15 +88,18 @@ Timeline.prototype.play = function(){
 		var elapsedTime = millis()-startTime;
 		console.log('start value:' + startValue)
 		console.log('target value:' + keys[keyNum].targetValue)
-		if(elapsedTime<keys[keyNum].time*1000){
-			setTimeout(animate,1000/getFrameRate())					
-			if(keys[keyNum].interpolation=='linear'){
-				curValue=startValue+(keys[keyNum].targetValue-startValue)*(elapsedTime/(keys[keyNum].time*1000))
+		var playSpeed = 1
+		if(elapsedTime<keys[keyNum].time*1000*(1/playSpeed)){
+			setTimeout(animate,1000/getFrameRate())	
+			var curTime=(elapsedTime/(keys[keyNum].time*1000))*playSpeed			
+			if(keys[keyNum].interpolation=='linear'){	
+				curValue=startValue+(keys[keyNum].targetValue-startValue)*curTime
 				//lerp actually works too with the below expression:
 				//curValue = lerp(startValue,keys[keyNum].targetValue,elapsedTime/(keys[keyNum].time*1000))
 			}else if(keys[keyNum].interpolation == 'ease'){
 				//Put in code for easing here
-				var curTime=(elapsedTime/(keys[keyNum].time*1000))
+				//var curTime=(elapsedTime/(keys[keyNum].time*1000))
+				//make this less confusing
 				curTime = (3*curTime*curTime)-(2*curTime*curTime*curTime)
 				curValue=startValue+(keys[keyNum].targetValue-startValue)*curTime
 			}
@@ -104,7 +107,7 @@ Timeline.prototype.play = function(){
 			Timeline.set(variable.name,curValue)
 		}else if(keyNum<keys.length-1){
 			startValue = window[variable.name]
-			startTime = millis()//keys[keyNum].time
+			startTime = millis()
 			keyNum++
 			setTimeout(animate,1000/getFrameRate())
 		}	
