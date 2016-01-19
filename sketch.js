@@ -1,52 +1,58 @@
 "use strict"
 
-var radius
+var radius, anim2, anim3
 var animation
+var timeline2
 
-function setup(){
-	createCanvas(windowWidth,windowHeight)
-	radius = 100
-	animation = new Timeline('radius')
-	animation.playSpeed = 1
+function setup() {
+    createCanvas(windowWidth, windowHeight)
+    radius = 10
+    anim2 = 10
 
-	animation.addKey(200,2,'ease')
-	animation.addKey(100,2,'ease')
-	animation.addKey(200,3,'linear')
-	animation.addKey(100,3,'linear')
-	//animation.stretchKeys(5)
-	//animation.startKey(5)
-	/*for(var k in animation.keys){
-		console.log(animation.keys[k].time)
-	}*/
-	fill(255)
-	textAlign(CENTER)
-	textSize(32)
-	console.log(animation.keys)
-}
-function draw(){
-	background(0)
-	ellipse(windowWidth/2,windowHeight/2,radius,radius)	
-	fill(255,radius,0);
-	rectMode(CENTER)
-	push();
-	translate(windowWidth/3,windowWidth/3);
-	rotate(radius/20);
-	rect(0,0,radius,radius*2);
-	pop();
-	push();
-	translate(windowWidth*.66,windowWidth*.33);
-	rotate(radius/20);
-	rect(0,0,radius,radius*2);
-	pop();		
-		
-	
-	text("Click once to play the animation",windowWidth/2,windowHeight-100)
+    animation = new Timeline('radius')
+    animation.playSpeed = 3
+
+    animation.addKey(200, 2, 'ease') //target value, keyPosition, interpolation
+    animation.addKey(66, 7, 'ease')
+    animation.addKey(506, 20, 'ease')
+    animation.addKey(200, 3, 'linear')
+    animation.addKey(200, 4, 'linear')
+
+
+    fill(255)
+    textAlign(CENTER)
+    textSize(32)
+
+
 }
 
-function mousePressed(){
-	//animation.shiftKeyPositions(3)
-	//console.log(animation.keys)
-	animation.play()
+function draw() {
+    background(0)
+    // if (animation.play.elapsedTime > 0) {
+    //     text((millis() - animation.startTime).toFixed(2), 50, 50)
+    // }
+    ellipse(windowWidth / 2, windowHeight / 2, radius, radius)
+    fill(255, radius, 0);
+    rectMode(CENTER)
+    push();
+    translate(windowWidth / 3, windowWidth / 3);
+    rotate(radius / 20);
+    rect(0, 0, radius, radius * 2);
+    pop();
+    push();
+    translate(windowWidth * .66, windowWidth * .33);
+    rotate(radius / 20);
+    rect(0, 0, radius, radius * 2);
+    pop();
+
+
+    text("Click once to play the animation", windowWidth / 2, windowHeight - 100)
+}
+
+function mousePressed() {
+
+    animation.play()
+
 }
 
 
@@ -55,92 +61,140 @@ function mousePressed(){
 ///////////////////////////////////////////////
 
 
-var Timeline = function(_variable){
-	this.variable = {
-		name: _variable,
-		value: window[_variable]
-	}	
-	this.keys = []
-	this.isPlaying = false
-	this.startTime = 0
-	this.playSpeed = 1
-	this.addKey(this.variable.value,0,'linear')
+var Timeline = function(_variable) {
+    this.variable = {
+        name: _variable,
+        value: window[_variable]
+    }
+    this.keys = []
+    this.isPlaying = false
+    this.startTime = 0
+    this.playSpeed = 1
+    this.shiftAmount = 0;
+    this.addKey(this.variable.value, 0, 'linear')
 }
 
-Timeline.prototype.stretchKeys = function(amount){
-	this.keys.forEach(function(entry) {
-		entry.time*=amount
-	});
-}
-Timeline.prototype.setKeyPositions = function(){
-	var curPos = 0
-	this.keys.forEach(function(k){
-		curPos+=k.time
-		k.keyPosition = curPos
-	})
-}
-Timeline.prototype.shiftKeyPositions = function(amount){
-	var curPos = amount
-	this.keys.forEach(function(k){
-		curPos+=k.time
-		k.keyPosition = curPos
-	})
-}
-Timeline.prototype.addKey = function(targetValue,time,interpolation){
-	var key = {
-		targetValue: targetValue,
-		time: time,
-		interpolation: interpolation
-	}	
-	this.keys.push(key)
-	this.setKeyPositions();
+Timeline.prototype.stretchKeys = function(amount) {
+    this.keys.forEach(function(entry) {
+        entry.time *= amount
+    });
 }
 
-Timeline.set = function (_variable, value){
-	window[_variable] = value
+Timeline.prototype.setKeyDurations = function() {
+    //duration is distance from this key tothe one before it
+    //get the duration of a key by subtracting its time from the previous one
+    for (var i in this.keys) {
+        if (i > 0) {
+            this.keys[i].duration = this.keys[i].keyPosition - this.keys[i - 1].keyPosition
+
+        } else {
+            this.keys[i].duration = this.keyPosition
+        }
+    }
 }
 
-Timeline.prototype.play = function(){
-	var startValue = window[this.variable.name]
-	var curValue = startValue
-	var isPlaying = this.isPlaying
-	var keys = this.keys
-	var variable = this.variable
-	var playSpeed = this.playSpeed
-	var startTime = this.startTime
-	var keyNum = 1
+Timeline.prototype.setKeyPositions = function() {
+    //new var for current position, run through all keys, start at zero
+    var curPos = 0
+        // k is a place holder for whatever item in the keys array its on
+    this.keys.forEach(function(k) {
+        curPos += k.time
+        k.keyPosition = curPos
+    })
+}
+Timeline.prototype.shiftKeyPositions = function(amount) {
+    var curPos = amount
+        //for each key in this.keys, add the argument 'amount' to it's time parameter
+    this.keys.forEach(function(k) {
+        curPos += k.time
+        k.keyPosition = curPos
+    })
+}
+Timeline.prototype.addKey = function(targetValue, keyPosition, interpolation) {
+    //create key object with 3 parameters, push it to the array 'this.keys' for this timeline, and call function 'this.setKeyPositions()'
+    var key = {
+        targetValue: targetValue,
+        keyPosition: keyPosition,
+        interpolation: interpolation
+    }
+    this.keys.push(key)
+    this.keys.sort(sortKeyPositions)
+        //should this be called after all art sorted?
+    this.setKeyDurations();
+    // this.setKeyPositions();
 
-	if(!isPlaying){
-		startTime = millis()
-	}
-	
-	isPlaying = true
-
-	var animate = function(){
-		var elapsedTime = millis()-startTime;
-		//console.log('start value:' + startValue)
-		//console.log('target value:' + keys[keyNum].targetValue)
-		if(elapsedTime<(keys[keyNum].time*1000/playSpeed)){
-			setTimeout(animate,1000/getFrameRate())	
-			var curTime=(elapsedTime/(keys[keyNum].time*1000))*playSpeed			
-			if(keys[keyNum].interpolation=='linear'){	
-				curValue=startValue+(keys[keyNum].targetValue-startValue)*curTime
-			}else if(keys[keyNum].interpolation == 'ease'){
-				curTime = (3*curTime*curTime)-(2*curTime*curTime*curTime)
-				curValue=startValue+(keys[keyNum].targetValue-startValue)*curTime
-			}
-			//console.log('setting value to: '+curValue)
-			Timeline.set(variable.name,curValue)
-		}else if(keyNum<keys.length-1){
-			startValue = window[variable.name]
-			startTime = millis()
-			keyNum++
-			setTimeout(animate,1000/getFrameRate())
-		}	
-		isPlaying = false
-	}
-		
-	animate()
-	
 }
 
+function sortKeyPositions(a, b) {
+    if (a.keyPosition < b.keyPosition)
+        return -1;
+    else if (a.keyPosition > b.keyPosition)
+        return 1;
+    else
+        return 0;
+}
+
+Timeline.set = function(_variable, value) {
+    window[_variable] = value
+}
+
+Timeline.prototype.play = function() {
+    var startValue = window[this.variable.name]
+    var curValue = startValue
+    var isPlaying = this.isPlaying
+    // var isPaused = this.isPaused
+    var keys = this.keys
+    var variable = this.variable
+    var playSpeed = this.playSpeed
+    var startTime = this.startTime
+    var keyNum = 1
+
+    if (!isPlaying) {
+        startTime = millis()
+    }
+
+    isPlaying = true
+
+    var animate = function() {
+        var elapsedTime = millis() - startTime;
+        if (elapsedTime < (keys[keyNum].duration * 1000 / playSpeed)) {
+            setTimeout(animate, 1000 / getFrameRate())
+            var curTime = (elapsedTime / (keys[keyNum].duration * 1000)) * playSpeed
+            if (keys[keyNum].interpolation == 'linear') {
+                curValue = startValue + (keys[keyNum].targetValue - startValue) * curTime
+            } else if (keys[keyNum].interpolation == 'ease') {
+                curTime = (3 * curTime * curTime) - (2 * curTime * curTime * curTime)
+                curValue = startValue + (keys[keyNum].targetValue - startValue) * curTime
+            }
+            //console.log('setting value to: '+curValue)
+            Timeline.set(variable.name, curValue)
+        } else if (keyNum < keys.length - 1) {
+            startValue = window[variable.name]
+            startTime = millis()
+            keyNum++
+            setTimeout(animate, 1000 / getFrameRate())
+        }
+        isPlaying = false
+    }
+
+    animate();
+
+}
+
+//can we just incorporate pause into play() ?
+// Timeline.prototype.pause = function() {
+//     var startValue = window[this.variable.name]
+//     var curValue = startValue
+//     var isPlaying = this.isPlaying
+//     var isPaused = this.isPaused
+//     var keys = this.keys
+//     var variable = this.variable
+//     var playSpeed = this.playSpeed
+//     var startTime = this.startTime
+//     var keyNum = 1
+
+//     isPaused = true;
+//     isPlaying = false;
+
+
+// }
